@@ -198,8 +198,6 @@ fun `test person instance creation`() {
   - **コンストラクタで複雑な処理を行わない**。
   - **privateなfactoryメソッド** を利用する。
 
----
-
 #### 2. 実行 (Act)
 
 テスト対象の振る舞いを実行します。
@@ -211,8 +209,6 @@ fun `test person instance creation`() {
 - **ベストプラクティス**
   - 実行フェーズは **1行** で完結するように設計する。
   - 実行フェーズが複数行になる場合は設計の見直しを検討する。
-
----
 
 #### 3. 確認 (Assert)
 
@@ -259,7 +255,6 @@ fun testAddition() {
 3. 振る舞いを重視する:
    - テスト対象のメソッド名は含めず、振る舞いを説明する。
    - should be のような曖昧な表現を避け、is を使う。
----
 
 #### 適切な例
 - Delivery_with_a_past_date_is_invalid()
@@ -282,16 +277,12 @@ fun testAddition() {
 ## Step 5: 良いテストの4本の柱
 良い単体テストを構成する4つの柱について説明します。これらの柱を理解し、バランスよく追求することで、テストコードの品質を向上させ、プロジェクト全体の持続可能な成長を実現できます。
 
----
-
-## 良いテストの4本の柱
+### 良いテストの4本の柱
 
 1. **退行 (Regression) に対する保護**
 2. **リファクタリングへの耐性**
 3. **迅速なフィードバック**
 4. **保守のしやすさ**
-
----
 
 ### 1. 退行 (Regression) に対する保護
 
@@ -304,7 +295,6 @@ fun testAddition() {
 - **注意点**
   - テストが変更の影響を正確に検知することが重要です。
 
----
 
 ### 2. リファクタリングへの耐性
 
@@ -382,12 +372,269 @@ fun testHtmlGeneration() {
 
 ただし、これらをすべて同時に最大限追求するのは困難なため、プロジェクトの性質や優先度に応じて最適なバランスを見つけることが重要です。テストはブラックボックステストを基本としつつ、必要に応じてホワイトボックステストを補完的に用いることで、安定したコードベースを実現しましょう。
 
-
 ## Step 6: テストダブルの活用
-内容: モックとスタブの違いを理解し、ログを持つViewModelのテストでモック化を体験します。
+
+### テストダブルとは
+
+テストダブルは、テスト対象コードが依存している外部コンポーネントを模倣するオブジェクトです。以下のような種類があります。
+
+- **モック (Mock)**  
+  外部に向かうコミュニケーションを模倣する。
+  - 例: メール送信サービスなど。
+
+- **スタブ (Stub)**  
+  内部に向かうコミュニケーションを模倣する。
+  - 例: データベースやAPIの呼び出し。
+
+- **その他のテストダブル**
+  - **ダミー**: 実際には使われないがテストに必要なオブジェクト。
+  - **スパイ**: 呼び出された履歴や回数を記録する。
+  - **フェイク**: 簡易実装を持つオブジェクト。
+
+#### モックとスタブの違い
+
+- **モック**  
+  入力を検証するために使用。  
+  例: メソッドが特定の引数で呼び出されたかを確認。
+
+- **スタブ**  
+  出力を模倣するために使用。  
+  例: APIが特定の値を返すように設定。
+
+モックは「コマンド (副作用を伴うメソッド)」、スタブは「クエリ (値を返すメソッド)」として利用する。
+
+#### スタブへのテストは避けるべき
+
+スタブの動作をテストすることはアンチパターンです。スタブは最終的な結果ではなく、その過程に過ぎません。  
+テストは「最終的な結果」に焦点を当て、非開発者にも意味のある内容にする必要があります。
+
+#### 不適切な例
+
+スタブの振る舞いを検証するテストは避けるべきです。
+
+```kotlin
+@Test
+fun `should remove inventory even if store does not have enough inventory (incorrect behavior)`() {
+    val storeMock = mockk<IStore>(relaxed = true)
+    every { storeMock.hasEnoughInventory(Product.Shampoo, 5) } returns false
+    every { storeMock.removeInventory(Product.Shampoo, 5) } returns Unit
+
+    val customer = Customer(storeMock)
+    val result = customer.purchase(Product.Shampoo, 5)
+    assertFalse(result)
+
+    // 不適切: スタブの振る舞いを検証している
+    verify { storeMock.removeInventory(Product.Shampoo, 5) }
+}
+```
+
+#### 適切な例
+外部へのコマンドを検証するモックを用いるテストは正しい。
+
+```kotlin
+@Test
+fun `should not remove inventory if store does not have enough inventory`() {
+    val storeMock = mockk<IStore>(relaxed = true)
+    every { storeMock.hasEnoughInventory(Product.Shampoo, 5) } returns false
+
+    val customer = Customer(storeMock)
+    val result = customer.purchase(Product.Shampoo, 5)
+    assertFalse(result)
+
+    // 適切: removeInventoryが呼び出されていないことを検証
+    verify(exactly = 0) { storeMock.removeInventory(Product.Shampoo, 5) }
+}
+```
+
+### コマンドとクエリの分離
+
+#### コマンド
+副作用を伴うメソッド。
+例: オブジェクトの値を変更するメソッド。
+
+#### クエリ
+副作用を伴わず値を返すメソッド。
+例: 引数を足し算して結果を返すメソッド。
+
+モックはコマンド、スタブはクエリを模倣する役割を持つ。
+
+#### 設計のポイント
+ドメイン層とアプリケーション層を分離することで、良いテストが書けるようになる。
+
+- ドメイン層: ビジネスロジックを表現する部分。
+- アプリケーション層: 外部依存とのやり取りを担当する部分。
+FAANSアプリではこの分離が行われているため、特に大きな修正は不要。
+
+### まとめ
+1. モックとスタブの役割を理解し、適切に使い分ける。
+2. スタブの振る舞いをテストしない。
+3. コマンドとクエリを明確に分離する設計を心がける。
+4. ドメイン層とアプリケーション層を分離し、依存を管理する。
+これらを実践することで、保守性の高いテストコードを構築し、プロジェクト全体の品質向上を実現する。
+
 
 ## Step 7: 単体テストの3つの手法
-内容: 出力値ベース、状態ベース、コミュニケーションベースの3つのテスト手法を示します。
+単体テストには以下の3つの手法があります。それぞれの特性を理解し、テスト対象や状況に応じて適切に使い分けることが重要です。
+
+1. **出力値ベーステスト**  
+2. **状態ベーステスト**  
+3. **コミュニケーションベーステスト**
+
+---
+
+### 1. 出力値ベーステスト
+
+**概要**  
+入力値を渡した後に得られる戻り値を検証します。この手法は最も簡潔で保守しやすいテストケースを作成できます。
+
+**特徴**
+- 検証対象は戻り値のみ。
+- テストコードがシンプルで保守が容易。
+
+**サンプルコード**
+
+```kotlin
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class CalculatorOutputTest {
+
+    private val calculator = Calculator()
+
+    @Test
+    fun `add should return sum of two numbers`() {
+        val result = calculator.add(2, 3)
+        assertEquals(5, result)
+    }
+}
+```
+
+#### 評価 (4本の柱)
+
+- 退行に対する保護: 高い
+- リファクタリングへの耐性: 高い
+- 迅速なフィードバック: 高い
+- 保守のしやすさ: 高い
+
+### 2. 状態ベーステスト
+
+処理の実行後にテスト対象オブジェクトの状態を検証します。
+
+#### 特徴
+
+- テスト対象の状態を詳細に検証可能。
+- 複数のアサーションが必要となり、保守が難しくなる。
+
+**サンプルコード**
+```kotlin
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class CalculatorStateTest {
+
+    private val calculator = Calculator()
+
+    @Test
+    fun `increment should increase value by 1`() {
+        calculator.increment()
+        assertEquals(1, calculator.value)
+    }
+
+    @Test
+    fun `reset should set value to 0`() {
+        calculator.increment()
+        calculator.reset()
+        assertEquals(0, calculator.value)
+    }
+}
+
+```
+
+#### 評価 (4本の柱)
+
+- 退行に対する保護: 高い
+- リファクタリングへの耐性: 普通
+- 迅速なフィードバック: 普通
+- 保守のしやすさ: 普通
+
+
+### 3. コミュニケーションベーステスト
+テスト対象と協力オブジェクトとの間のコミュニケーションをモックを使って検証します。
+
+#### 特徴
+
+- 外部依存やコマンドの正しい呼び出しを確認可能。
+- 保守性が低く、リファクタリングの影響を受けやすい。
+
+**サンプルコード**
+```kotlin
+class CalculatorCommunicationTest {
+
+    @Test
+    fun `add should log the addition operation`() {
+        // モックのLoggerを作成
+        val logger: Logger = mock()
+
+        // モックを注入してCalculatorWithLoggerのインスタンスを作成
+        val calculator = CalculatorWithLogger(logger)
+
+        // メソッド呼び出し
+        calculator.add(2, 3)
+
+        // logメソッドが正しい引数で呼ばれたかを検証
+        verify(logger).log("Adding 2 and 3: result is 5")
+    }
+}
+
+```
+
+#### 評価 (4本の柱)
+
+- 退行に対する保護: 普通
+- リファクタリングへの耐性: 普通
+- 迅速なフィードバック: 普通
+- 保守のしやすさ: 低い
+
+#### 3つの手法の比較
+| 手法                     | リファクタリングへの耐性 | 保守のしやすさ | テストコードの簡潔さ |
+|--------------------------|-------------------------|----------------|----------------------|
+| **出力値ベーステスト**   | 高い                    | 高い           | 高い                 |
+| **状態ベーステスト**     | 普通                    | 普通           | 普通                 |
+| **コミュニケーションベーステスト** | 普通                | 低い           | 低い                 |
+
+### 出力値ベーステストが最も優れている理由
+出力値ベーステストは以下の理由で最も優れた手法です。
+
+- テストコードが簡潔で保守しやすい。
+- 検証対象が戻り値だけのため、リファクタリングの影響を受けにくい。
+ただし、出力値ベーステストを使用するには、プロダクションコードが関数型プログラミングで書かれていることが理想的です。オブジェクト指向プログラミングでは実現が難しい場合もあります。
+
+### 状態ベーステストの保守性の課題
+状態ベーステストでは以下の課題があります。
+
+- 複数のアサーションが必要になる。
+- アサーションをヘルパーメソッドで共通化しても、ヘルパーメソッド自体の保守が必要になる。
+
+**ヘルパーメソッドの例**
+```kotlin
+private fun assertAccountState(account: BankAccount, expectedBalance: Int, expectedIsActive: Boolean) {
+    assertEquals(expectedBalance, account.balance, "Balance should be $expectedBalance")
+    assertEquals(expectedIsActive, account.isActive, "Account active state should be $expectedIsActive")
+}
+```
+
+### 結論
+1. 出力値ベーステスト
+最も保守しやすく、リファクタリングにも耐性がある。ただし、すべてのプロダクションコードに適用できるわけではない。
+
+2. 状態ベーステスト
+状態を詳細に検証できるが、保守性が低下しやすい。
+
+3. コミュニケーションベーステスト
+外部依存の検証には必要だが、保守性が低く、リファクタリングの影響を受けやすい。
+
+出力値ベーステストを基本とし、必要に応じて他の手法を補完的に使用するのが理想的です。
+
 
 ## Step 8: 複雑なコードのリファクタリング
 内容: ViewModelに履歴機能を持たせ、ビジネスロジックとUIの分離を学びます。
