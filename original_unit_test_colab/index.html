@@ -56,29 +56,7 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 1: プロジェクトセットアップ" duration="0">
-        <p>概要: シンプルなカウンターアプリを作成します。ボタンを押すたびにカウントが増加し、テキスト表示が更新されます。</p>
-<p class="image-container"><img alt="creating_app" src="img/c58bb89799e99447.png"></p>
-<h2 is-upgraded>GitHub からクローンを作成する</h2>
-<p>GitHub からこの Codelab のクローンを作成するには、次のコマンドを実行します。</p>
-<pre><code>git clone https://github.com/yshogo/unit-test-codelab-sample.git
-cd unittestcodelabsample
-git checkout master
-</code></pre>
-<h3 is-upgraded>概要</h3>
-<p>シンプルなカウンターアプリを作成します。このアプリでは、ボタンを押すたびにカウントが増加し、テキスト表示が更新されるようになっています。</p>
-<h3 is-upgraded>主なクラス</h3>
-<ul>
-<li><strong>CounterViewModel</strong>: カウントロジックを管理するViewModel</li>
-<li><strong>CounterScreen</strong>: Jetpack Composeでカウント表示とボタンを実装</li>
-</ul>
-<h3 is-upgraded>次のステップ</h3>
-<p>次のステップでは、このカウンターアプリの increment() メソッドに対する単体テストを実装し、その動作を検証していきます。</p>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="Step 2: 単体テストの目的" duration="0">
+      <google-codelab-step label="Step 1: 単体テストの目的" duration="0">
         <p>ソフトウェア開発において、単体テストの第一の目的はコード設計を改善することではなく、プロジェクトを<strong>持続可能</strong>なものにすることです。この「持続可能性」が重要な理由は、ソフトウェアは新しい機能や変更が加わるごとに自然と複雑さが増していき、保守性が低下しやすくなるためです。この複雑化（エントロピー）の進行を防ぐために、単体テストはコードの変更が意図しない影響を与えていないかを確認する「セーフティネット」としての役割を果たします。</p>
 <h2 is-upgraded>ソフトウェアエントロピーと単体テストの役割</h2>
 <p><strong>ソフトウェアエントロピー</strong>は、機能追加や改良を行うたびにコードが複雑化し、保守が難しくなる現象を指します。単体テストはこのエントロピーを防ぎ、コードが安定した状態を保つことに貢献します。単体テストの準備には初期の労力が必要ですが、その労力は後々のデバッグや修正の回数を減らすことで、開発効率と保守性を向上させます。</p>
@@ -173,14 +151,14 @@ fun `test person instance creation`() {
 </td><td colspan="1" rowspan="1"><p>１つのクラス、もしくは、同じ目的を達成するためのクラスの１グループ</p>
 </td></tr>
 </table>
-<p>この場合、ロンドン学派では、検証内容が詳細になりすぎてしまうことがあります。単体テストが内部構造と深く結びついてしまうことで、保守性の低いテストコードになってしまうからです。（詳細についてはstep5で説明します。）</p>
+<p>この場合、ロンドン学派では、検証内容が詳細になりすぎてしまうことがあります。単体テストが内部構造と深く結びついてしまうことで、保守性の低いテストコードになってしまうからです。（詳細についてはstep4で説明します。）</p>
 <h2 is-upgraded>次のステップ</h2>
 <p>次のステップでは、単体テストの基本的な構造と、広く使用される<strong>AAAパターン</strong>（Arrange-Act-Assert）について学びます。</p>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 4: 単体テストの構造とAAAパターン" duration="0">
+      <google-codelab-step label="Step 3: 単体テストの構造とAAAパターン" duration="0">
         <p>この章では、単体テストを書く際の基本構造である <strong>AAAパターン</strong> と適切なテスト命名規則について学びます。これにより、一貫性があり、わかりやすいテストコードを作成できるようになります。</p>
 <h2 is-upgraded>AAAパターン</h2>
 <p>単体テストでは、<strong>AAAパターン (Arrange, Act, Assert)</strong> を使用してテストを構成します。以下に各フェーズの詳細を説明します。</p>
@@ -293,7 +271,7 @@ fun `test person instance creation`() {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 5: 良いテストの4本の柱" duration="0">
+      <google-codelab-step label="Step 4: 良いテストの4本の柱" duration="0">
         <p>良い単体テストを構成する4つの柱について説明します。これらの柱を理解し、バランスよく追求することで、テストコードの品質を向上させ、プロジェクト全体の持続可能な成長を実現できます。</p>
 <h2 is-upgraded>良いテストの4本の柱</h2>
 <ol type="1">
@@ -403,7 +381,7 @@ fun `test person instance creation`() {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 6: テストダブルの活用" duration="0">
+      <google-codelab-step label="Step 5: テストダブルの活用" duration="0">
         <h2 is-upgraded>テストダブルとは</h2>
 <p>テストダブルは、テスト対象コードが依存している外部コンポーネントを模倣するオブジェクトです。以下のような種類があります。</p>
 <ul>
@@ -484,7 +462,7 @@ fun `should not remove inventory if store does not have enough inventory`() {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 7: 単体テストの3つの手法" duration="0">
+      <google-codelab-step label="Step 6: 単体テストの3つの手法" duration="0">
         <p>単体テストには以下の3つの手法があります。それぞれの特性を理解し、テスト対象や状況に応じて適切に使い分けることが重要です。</p>
 <ol type="1">
 <li><strong>出力値ベーステスト</strong></li>
@@ -643,14 +621,30 @@ class CalculatorStateTest {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 8: 複雑なコードのリファクタリング" duration="0">
-        <p>内容: ViewModelに履歴機能を持たせ、ビジネスロジックとUIの分離を学びます。</p>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="Step 9: 完成形とまとめ" duration="0">
-        <p>完成形コード: 最終的なCounterアプリとテストコードを確認します。 まとめ: テストの基本原則とJetpack Compose特有のUIテストの利点を確認し、リファクタリング耐性と保守性について学びます。</p>
+      <google-codelab-step label="まとめ" duration="0">
+        <p>Jetpack Composeでの単体テストでは、以下の知識と技術が重要です。</p>
+<ol type="1">
+<li><strong>AAAパターンの徹底<br></strong> テストを一貫した構造で書くことで、コードの読みやすさとメンテナンス性が向上します。</li>
+<li><strong>良いテストの4本の柱の追求</strong><ul>
+<li>退行に対する保護</li>
+<li>リファクタリングへの耐性</li>
+<li>迅速なフィードバック</li>
+<li>保守のしやすさ<br> これらをバランスよく追求することで、プロジェクト全体の持続可能な成長を支えます。</li>
+</ul>
+</li>
+<li><strong>テストダブルの適切な活用<br></strong> モックやスタブを使い分け、テスト対象の振る舞いを正確に検証する設計を心がけます。</li>
+<li><strong>単体テストの3つの手法</strong><ul>
+<li>出力値ベーステスト：最も保守性が高い手法で基本とすべき。</li>
+<li>状態ベーステスト：必要に応じて補完的に使用。</li>
+<li>コミュニケーションベーステスト：外部依存の検証が必要な場面で使用。</li>
+</ul>
+</li>
+</ol>
+<h2 is-upgraded>単体テストの価値</h2>
+<p>単体テストは、コードの品質向上とプロジェクトの持続可能性に寄与します。良いテストは、コードの変更によるリスクを軽減し、開発の効率と安心感を高めます。</p>
+<h2 is-upgraded>テストの最適化</h2>
+<p>すべてのテスト手法を一律に適用するのではなく、プロジェクトの特性やコードベースに合わせて適切に選択することが重要です。特に、出力値ベーステストを基盤としながら、状況に応じて状態ベースやコミュニケーションベースのテストを補完的に使用することで、テストの価値を最大化できます。</p>
+<p>Jetpack Composeを活用した単体テストを通じて、品質の高いコードベースとスムーズな開発プロセスを構築しましょう。</p>
 
 
       </google-codelab-step>
