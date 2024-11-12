@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#4F7DC9">
   <meta charset="UTF-8">
-  <title>Codelab: Jetpack Composeでの単体テスト学習</title>
+  <title>Codelab: 単体テストの基本と実践</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
@@ -24,19 +24,25 @@
   <google-codelab codelab-gaid="XXXXXXXX"
                   codelab-ga4id=""
                   id="original_unit_test_codelab"
-                  title="Codelab: Jetpack Composeでの単体テスト学習"
+                  title="Codelab: 単体テストの基本と実践"
                   environment="web"
                   feedback-link="https://github.com/yshogo">
     
       <google-codelab-step label="はじめに" duration="0">
-        <p>このCodelabでは、「単体テストの考え方/使い方」を参考に、Androidアプリ開発での単体テストの基礎を学びます。 特に、Jetpack Compose を活用したサンプルコードを通じて、テスト実装の具体的な方法を解説します。</p>
-<aside class="warning"><p> 注意： このCodelabは著者である山田の解釈を基に作成されていますが、本書の内容を完全に網羅しているわけではありません。 また、解釈に誤りが含まれている可能性もあります。そのため、このCodelabを通じて基本的な理解を深めるだけでなく、必ず原書も併せてお読みいただき、より深い理解を得ていただくことを推奨します。 </p>
+        <p>このCodelabでは、「単体テストの考え方/使い方」を参考に、ソフトウェア改発での単体テストの基礎を学びます。 Kotlinを使ったサンプルコードを通じて、テスト実装の具体的な方法を解説します。</p>
+<aside class="warning"><p> 注意： このCodelabは山田の解釈を基に作成されていますが、本書の内容を完全に網羅しているわけではありません。<br> また、解釈に誤りが含まれている可能性もあります。そのため、このCodelabを通じて基本的な理解を深めるだけでなく、必ず原書も併せてお読みいただき、より深い理解を得ていただくことを推奨します。 </p>
+<p>原書は<a href="https://amzn.to/3Cq9Ze0" target="_blank">こちら</a><br> 読書メモは<a href="https://zozo.rickcloud.jp/wiki/pages/viewpage.action?pageId=740200895" target="_blank">こちら</a></p>
 </aside>
 <h2 is-upgraded>目的</h2>
-<p>このCodelabの目的は、Jetpack Composeを活用したテストの実装方法を学ぶことです。基本的なテストの考え方を学ぶだけでなく、実際の開発にすぐに応用できるテクニックも紹介します。</p>
+<p>このCodelabの目的は、単体テストの基礎的な考え方を学び、実践的なテストの方法を理解することです。 具体的には、以下を学びます:</p>
+<ul>
+<li>ソフトウェアエントロピーの抑制に単体テストがどう役立つか</li>
+<li>単体テストでよく使われるパターン（AAAパターンなど）</li>
+<li>モックやスタブの具体的な活用方法</li>
+</ul>
 <h2 is-upgraded>対象読者</h2>
 <ul>
-<li>Android開発に携わっている方</li>
+<li>ソフトウェア開発に携わっている方</li>
 <li>単体テストの基本概念を学びたい方</li>
 </ul>
 <h2 is-upgraded>前提条件</h2>
@@ -50,26 +56,31 @@
       <google-codelab-step label="Step 1: 単体テストの目的" duration="0">
         <p>ソフトウェア開発において、単体テストの第一の目的はコード設計を直接改善することではなく、プロジェクトを<strong>持続可能</strong>なものにすることです。この「持続可能性」が重要な理由は、ソフトウェアは新しい機能や変更が加わるごとに自然と複雑さが増していき、保守性が低下しやすくなるためです。この複雑化（エントロピー）の進行を防ぐために、単体テストはコードの変更が意図しない影響を与えていないかを確認する「セーフティネット」としての役割を果たします。</p>
 <h2 is-upgraded>ソフトウェアエントロピーと単体テストの役割</h2>
-<p><strong>ソフトウェアエントロピー</strong>は、機能追加や改良を行うたびにコードが複雑化し、保守が難しくなる現象を指します。単体テストはエントロピーを抑え、コードを安定した状態に保つ役割を果たします。単体テストの準備には初期の労力が必要ですが、その労力は、後々のデバッグや修正の回数を減らすことで、開発効率や保守性の向上に寄与します。</p>
+<p><strong>ソフトウェアエントロピー</strong>とは、ソフトウェアが新しい機能追加やバグ修正を繰り返すたびに、コードが読みづらくなり保守が難しくなる現象を指します。 例えば、最初は簡潔だったクラスが、新機能追加のたびに条件分岐や依存関係を増やしていき、最終的に手が付けられないほど複雑になることがあります。単体テストはエントロピーを抑え、コードを安定した状態に保つ役割を果たします。単体テストの準備には初期の労力が必要ですが、その労力は後々のデバッグや修正の回数を減らすことで、開発効率や保守性の向上に寄与します。</p>
 <p class="image-container"><img alt="entropy" src="img/3453ffce6e4c2a31.jpg"></p>
 <aside class="special"><p> 例え話 </p>
 <p>単体テストは、部屋の大掃除に似ています。最初に時間をかけて徹底的に整理整頓するのは大変ですが、きちんと片付けをしておけば、後々は少しの手間できれいな状態を維持できます。同様に、プロジェクトに最初から十分な単体テストを導入することで、最初は時間と労力が必要ですが、長期的にはコード保守が格段に楽になります。例えば、プロダクションコードのリファクタリング時にテストコードも見直し、テストが失敗した際はその原因をすぐに修正するなどの作業を通じて、テストの価値が維持され、コード全体の品質も安定します。しかし、適切なテスト設計やメンテナンスを怠ると、片付けの進まない部屋のように、コードも複雑さやエラーが蓄積し、最終的にはプロジェクト全体の負担となるでしょう。</p>
 </aside>
 <h2 is-upgraded>単体テストの価値と保守コストのバランス</h2>
-<p>単体テストは、コードの品質を保ちながら開発を進める上で重要ですが、テストの価値を発揮するためには単体テストの価値と保守コストの両方を考慮しなければなりません。 そしてこのコストは下記に挙げるさまざまな作業で費やされる時間が積み重なることで増加していきます。</p>
+<p>単体テストの価値を最大限発揮するためには、価値と保守コストの両方をバランスよく考慮する必要があります。 このコストは、以下のような作業が積み重なることで増加します。</p>
 <ul>
 <li>プロダクションコードのリファクタリングに伴ってテスト・コードをリファクタリングすること</li>
 <li>プロダクションコードを変更するたびにテストを実施すること</li>
 <li>テストが間違って失敗した際にその対処をすること</li>
 <li>プロダクションコードがどのように振る舞うのかを理解するためにテストコードを読むこと</li>
 </ul>
-<p>これらの要点を押さえて、テストスイートを設計することで、持続可能でプロジェクト全体に貢献する価値あるテストを設計することができます。 作成した単体テストへの保守コストがあまりにもかかりすぎると、その単体テストの価値がなくなってしまう、もしくはマイナスになってしまうことがあります。</p>
+<p>これらの要点を押さえて、テストスイートを設計することで、持続可能でプロジェクト全体に貢献する価値あるテストを設計することができます。 作成した単体テストへの保守コストがあまりにもかかりすぎると、その単体テストの価値がなくなってしまう、もしくはマイナスになってしまうことがあります。 例えば、以下のような場合が挙げられます:</p>
+<ul>
+<li>テストケースが内部実装に強く依存しているため、リファクタリングのたびに修正が必要になる</li>
+<li>無関係なコード変更によってテストが頻繁に失敗し、開発効率が低下する</li>
+</ul>
 <h2 is-upgraded>コードカバレッジとテストの質</h2>
-<p>コードカバレッジ（テスト実行中に実行されるコード行の割合）は、テストスイートの品質を測る指標として使用されることが多いですが、<strong>カバレッジだけではテストの質は保証できません</strong>。カバレッジに過度にこだわると、カバレッジを上げるためだけに表面的なテストや冗長なテストを書く傾向が生まれることがあります。良質なテストは、カバレッジの高さに依存せず、特に失敗の影響が大きいビジネスロジック部分に焦点を当てるべきです。</p>
+<p>コードカバレッジ（テスト実行中に実行されるコード行の割合）は、テストスイートの品質を測る指標として使用されることが多いですが、<strong>カバレッジだけではテストの質は保証できません</strong>。カバレッジに過度にこだわると、カバレッジを上げるためだけに表面的なテストや冗長なテストを書く傾向が生まれることがあります。こうしたテストは、実際にはビジネス的に重要ではない部分に多くの時間と労力を費やすことになり、結果としてコードベースの複雑性や保守性を不必要に高め、本来の目的であるソフトウェアの品質向上や信頼性確保を達成できなくなるリスクがあります。</p>
+<p>大事なのは、最小限の保守コストで最大限の価値を生み出すことです。テストスイートはその目的にフォーカスするべきであり、単に高いコードカバレッジを目指すべきではありません。特に失敗の影響が大きいビジネスロジック部分に焦点を当て、実際に価値を生み出すテストを優先することで、テストが持つ本来の役割を果たすことができます。</p>
 <h2 is-upgraded>優れたテストスイートの特徴</h2>
 <p>優れたテストスイートには以下の特徴があります：</p>
 <ul>
-<li><strong>開発サイクルに統合されている</strong>：テストは開発プロセスに組み込まれ、後付けではありません。</li>
+<li><strong>開発サイクルに統合されている</strong>：テストは開発プロセスに組み込まれ、後付けではない。</li>
 <li><strong>コードベースの特に重要な部分のみがテスト対象となっている</strong>：特にビジネスロジックなどを含む部分（ドメイン・モデル）に重点を置いたテストが行われる。 <ul>
 <li>インフラに関するコード</li>
 <li>外部サービスや依存関係にあるもの（例：データベースやサード・パーティのシステム）</li>
@@ -79,7 +90,7 @@
 </ul>
 <p>このように設計された単体テストによって、コードベースの複雑化を抑えながら、プロジェクト全体が安心して成長できる基盤を築くことができます。</p>
 <h2 is-upgraded>次のステップ</h2>
-<p>次のステップでは、単体テストの書き方や考え方の違いを深掘りし、古典学派とロンドン学派という2つの主要なアプローチについて学びます。</p>
+<p>次のステップでは、単体テストの書き方を理解するために、古典学派とロンドン学派という2つの主要なアプローチを比較します。</p>
 
 
       </google-codelab-step>
@@ -94,6 +105,8 @@
 <li>他のコンポーネントから隔離されている</li>
 </ul>
 <p>この「隔離」に対する考え方の違いが、古典学派とロンドン学派を分けています。以下で、それぞれのアプローチを見ていきましょう。</p>
+<aside class="special"><p> 古典学派はデトロイト学派とも呼ばれ、最も古典主義的な方法で単体テストに取り組む学派です。 一方、ロンドン学派の人たちのことを **モック主義者** とも呼ぶこともあります。 </p>
+</aside>
 <h2 is-upgraded>古典学派</h2>
 <p>古典学派では、実際のインスタンスをテストケース内で生成し、プロダクションコードの実際の挙動をテストします。依存関係も基本的に実際のものを使用するため、コードそのものの動作を確認しやすいという特徴があります。以下に古典学派の例を示します：</p>
 <pre><code language="language-kotlin" class="language-kotlin">@Test
@@ -127,6 +140,20 @@ fun `test person instance creation`() {
 <li>古典学派：実際のプロダクションコードを使い、テストケースをコード全体の挙動と合わせて設計します。設計の見直しを促し、シンプルなテストが可能です。</li>
 <li>ロンドン学派：モックを多用し、テストをクラス単位で隔離して実施します。依存を多く持つ複雑なコードには適していますが、モックが多くなるとテストが煩雑になることがあります。</li>
 </ul>
+<table>
+<tr><td colspan="1" rowspan="1"><p>学派</p>
+</td><td colspan="1" rowspan="1"><p>特徴</p>
+</td><td colspan="1" rowspan="1"><p>適用に向くケース</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>古典学派</p>
+</td><td colspan="1" rowspan="1"><p>実際のインスタンスを利用</p>
+</td><td colspan="1" rowspan="1"><p>小規模プロジェクトや依存が少ないコード</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>ロンドン学派</p>
+</td><td colspan="1" rowspan="1"><p>モックを多用し、独立性を保つ</p>
+</td><td colspan="1" rowspan="1"><p>大規模プロジェクトや外部依存が多い場合</p>
+</td></tr>
+</table>
 <h2 is-upgraded>ロンドン学派は課題もいくつか抱えている。</h2>
 <p>ロンドン学派の長所は魅力的なように思えるが、単体テストにおいて、テスト対象の焦点をクラスに当てることは間違いです。 焦点を当てるべきは１単位のコードではなく、１単位の振る舞いです。</p>
 <table>
@@ -144,7 +171,11 @@ fun `test person instance creation`() {
 </table>
 <p>この場合、ロンドン学派では、検証内容が詳細になりすぎてしまうことがあります。単体テストが内部構造と深く結びついてしまうことで、保守性の低いテストコードになってしまうからです。（詳細についてはstep4で説明します。）</p>
 <h2 is-upgraded>次のステップ</h2>
-<p>次のステップでは、単体テストの基本的な構造と、広く使用される<strong>AAAパターン</strong>（Arrange-Act-Assert）について学びます。</p>
+<p>次のステップでは、単体テストの基本的な構造と、広く使用される**AAAパターン（Arrange-Act-Assert）**について学びます。 このパターンを習得することで、次のような場面で役立ちます:</p>
+<ul>
+<li>新しいコードに対して一貫性のあるテストを迅速に追加したいとき</li>
+<li>チームメンバーがテストコードを読みやすく、理解しやすくする工夫をしたいとき</li>
+</ul>
 
 
       </google-codelab-step>
@@ -199,17 +230,19 @@ fun `test person instance creation`() {
 </ul>
 <h2 is-upgraded>サンプルコード</h2>
 <p>以下は、AAAパターンを適用した単純なテストケースの例です。</p>
-<pre><code language="language-kotlin" class="language-kotlin">fun testAddition() {
-    // Arrange
+<pre><code language="language-kotlin" class="language-kotlin">// AAAパターンを適用した詳細なテスト例
+@Test
+fun `addition should return correct sum`() {
+    // Arrange: テスト対象を準備
     val calculator = Calculator()
-    val a = 5
-    val b = 3
+    val inputA = 10
+    val inputB = 20
 
-    // Act
-    val result = calculator.add(a, b)
+    // Act: メソッドを実行
+    val result = calculator.add(inputA, inputB)
 
-    // Assert
-    assertEquals(8, result)
+    // Assert: 結果を確認
+    assertEquals(30, result, &#34;加算の結果が期待値と一致しません&#34;)
 }
 </code></pre>
 <h2 is-upgraded>テストメソッドの命名規則</h2>
@@ -291,6 +324,9 @@ fun `test person instance creation`() {
 <li>テストコードがプロダクションコードの内部実装に依存している場合、リファクタリングでテストが壊れやすくなります。</li>
 </ul>
 </li>
+</ul>
+<p>この結果、ロンドン学派では、検証内容が詳細になりすぎてしまうことがあります。単体テストがプロダクションコードの内部構造と深く結びついてしまうため、<strong>リファクタリングによる変更を過剰に検知</strong>してしまい、保守性の低いテストコードになってしまうのです。 これにより、コード自体は正しい挙動を保っているにもかかわらず、偽陽性が生じやすいという問題が発生します。</p>
+<ul>
 <li><strong>解決策</strong><ul>
 <li><strong>テスト対象のコードの内部実装からテストコードを切り離す</strong>。</li>
 <li>テストの検証対象を「観察可能な振る舞い」に限定する。</li>
@@ -359,6 +395,10 @@ fun `test person instance creation`() {
 </ul>
 </li>
 </ul>
+<h2 is-upgraded>単体テストにおけるブラックボックステストとホワイトボックステストの役割</h2>
+<p>単体テストでは、 <strong>振る舞いを検証するためにブラックボックステストを基本とするべきです。</strong> これは、テストケースがビジネス要求を反映していなければ、テストが容易に壊れやすくなるからです。 <br><br><strong>ビジネス要求を導き出せないテストケース</strong> は、価値を持たない可能性が高いため、特に単体テストでは振る舞いに焦点を当てる必要があります。</p>
+<p>一方で、 <strong>未検証の経路を見つけ出す際にはホワイトボックステストが有効です。</strong> 内部実装を分析し、検証漏れのある経路を特定することで、テスト網羅性を向上させることができます。<br><br> ただし、ホワイトボックステストの結果をそのままテストケースに反映するのではなく、 <strong>未検証経路を意識せずに振る舞いを中心にした自然なテストケース</strong> を作成することが求められます。 このアプローチにより、内部実装への依存を避けながらも網羅性を向上させることが可能です。</p>
+<p>ブラックボックステストで振る舞いを保証し、ホワイトボックステストでテストの隙間を補完する。これにより、 <strong>テストの安定性と信頼性を高める設計</strong> が実現できます。</p>
 <h2 is-upgraded>まとめ</h2>
 <p>良い単体テストは、以下の4本の柱をバランスよく満たすことを目指します。</p>
 <ol type="1">
@@ -367,7 +407,7 @@ fun `test person instance creation`() {
 <li>迅速なフィードバック</li>
 <li>保守のしやすさ</li>
 </ol>
-<p>ただし、これらをすべて同時に最大限追求するのは困難なため、プロジェクトの性質や優先度に応じて、最適なバランスを追求することが重要です。テストはブラックボックステストを基本としつつ、必要に応じてホワイトボックステストを補完的に用いることで、安定したコードベースを実現しましょう。</p>
+<p>ただし、これらをすべて同時に最大限追求するのは困難なため、プロジェクトの性質や優先度に応じて、最適なバランスを追求することが重要です。テストは <strong>ブラックボックステストを基本としつつ、必要に応じてホワイトボックステストを補完的に用いることで、安定したコードベースを実現しましょう。</strong></p>
 
 
       </google-codelab-step>
@@ -376,14 +416,76 @@ fun `test person instance creation`() {
         <h2 is-upgraded>テストダブルとは</h2>
 <p>テストダブルは、テスト対象コードが依存している外部コンポーネントを模倣するためのオブジェクトです。以下のような種類があります。</p>
 <ul>
-<li><strong>モック (Mock)<br></strong> 外部に向かうコミュニケーションを模倣する。<ul>
+<li><strong>モック (Mock)<br></strong> 外部に向かうコミュニケーションを模倣する。 <ul>
 <li>例: メール送信サービスなど。</li>
 </ul>
 </li>
-<li><strong>スタブ (Stub)<br></strong> 内部に向かうコミュニケーションを模倣する。<ul>
+</ul>
+<pre><code language="language-kotlin" class="language-kotlin">// 外部メール送信サービスのインターフェース
+interface EmailService {
+    fun sendEmail(to: String, subject: String, body: String): Boolean
+}
+
+// テスト対象クラス
+class NotificationService(private val emailService: EmailService) {
+    fun notifyUser(email: String): Boolean {
+        return emailService.sendEmail(email, &#34;Welcome!&#34;, &#34;Thanks for joining us!&#34;)
+    }
+}
+
+// モックを使ったテスト
+fun main() {
+    // モック: メール送信サービスの動作を模倣
+    val mockEmailService = object : EmailService {
+        override fun sendEmail(to: String, subject: String, body: String): Boolean {
+            println(&#34;Mocked email sent to: $to with subject: $subject&#34;) // ログを出力して模倣
+            return true // 常に成功を返す
+        }
+    }
+
+    // テスト対象にモックを注入
+    val notificationService = NotificationService(mockEmailService)
+
+    // テスト実行と検証
+    assert(notificationService.notifyUser(&#34;user@example.com&#34;)) // 結果が成功であることを確認
+}
+</code></pre>
+<ul>
+<li><strong>スタブ (Stub)<br></strong> 内部に向かうコミュニケーションを模倣する。 <ul>
 <li>例: データベースやAPIの呼び出し。</li>
 </ul>
 </li>
+</ul>
+<pre><code language="language-kotlin" class="language-kotlin">// データベースサービスのインターフェース
+interface DatabaseService {
+    fun getUser(userId: Int): String?
+}
+
+// テスト対象クラス
+class UserService(private val databaseService: DatabaseService) {
+    fun fetchUserName(userId: Int): String {
+        return databaseService.getUser(userId) ?: &#34;Unknown User&#34;
+    }
+}
+
+// スタブを使ったテスト
+fun main() {
+    // スタブ: データベースから固定の結果を返す
+    val stubDatabaseService = object : DatabaseService {
+        override fun getUser(userId: Int): String? {
+            return if (userId == 1) &#34;John Doe&#34; else null // 特定の入力に対して固定値を返す
+        }
+    }
+
+    // テスト対象にスタブを注入
+    val userService = UserService(stubDatabaseService)
+
+    // テスト実行と検証
+    assert(userService.fetchUserName(1) == &#34;John Doe&#34;) // ID 1 の場合
+    assert(userService.fetchUserName(2) == &#34;Unknown User&#34;) // 存在しない場合
+}
+</code></pre>
+<ul>
 <li><strong>その他のテストダブル</strong><ul>
 <li><strong>ダミー</strong>: 実際には使われないがテストに必要なオブジェクト。</li>
 <li><strong>スパイ</strong>: 呼び出された履歴や回数を記録する。</li>
@@ -397,10 +499,45 @@ fun `test person instance creation`() {
 <li><strong>スタブ<br></strong> 出力を模倣するために使用。<br> 例: APIが特定の値を返すように設定。</li>
 </ul>
 <p>モックは「コマンド (副作用を伴うメソッド)」、スタブは「クエリ (値を返すメソッド)」として利用する。</p>
+<p><strong>サンプルコード</strong></p>
+<pre><code language="language-kotlin" class="language-kotlin">import io.mockk.*
+import org.junit.Test
+import kotlin.test.assertTrue
+
+class PurchaseServiceTest {
+
+    @Test
+    fun testPurchase() {
+        // スタブ: 商品情報を返す
+        val productRepository = mockk&lt;ProductRepository&gt;()
+        every { productRepository.getProduct(&#34;product-123&#34;) } returns Product(
+            id = &#34;product-123&#34;,
+            name = &#34;Test Product&#34;,
+            price = 100.0
+        )
+
+        // モック: 支払いサービスの呼び出しを検証する
+        val paymentService = mockk&lt;PaymentService&gt;()
+        every { paymentService.processPayment(100.0) } returns true // 固定の結果を返す
+
+        // テスト対象のサービス
+        val purchaseService = PurchaseService(productRepository, paymentService)
+
+        // テスト実行
+        val result = purchaseService.purchase(&#34;product-123&#34;)
+
+        // アサーション
+        assertTrue(result)
+
+        // モックの検証
+        verify { paymentService.processPayment(100.0) } // 呼び出しを確認
+    }
+}
+</code></pre>
 <h3 is-upgraded>スタブへのテストは避けるべき</h3>
-<p>スタブの動作をテストすることはアンチパターンです。スタブは最終的な結果を示すものではなく、テスト過程の一部に過ぎません。 テストは「最終的な結果」に焦点を当て、非開発者にも意味のある内容にする必要があります。</p>
+<p>スタブの動作をテストすることはアンチパターンです。スタブは最終的な結果を示すものではなく、テスト過程の一部に過ぎません。 テストでは「最終的な結果」に焦点を当てることが重要です。結果が期待通りかどうかを確認することで、開発者だけでなく、非開発者にもわかりやすい価値あるテストを実現できます。</p>
 <h3 is-upgraded>不適切な例</h3>
-<p>スタブの振る舞いを検証するテストは避けるべきです。</p>
+<p>スタブの振る舞いを検証するテストは避けるべきです。 下記のコードでは、 <code>storeMock.removeInventory</code> をスタブで設定していますが、 <code>verify</code> で <code>storeMock.removeInventory(Product.Shampoo, 5)</code> を検証してしまっています。</p>
 <pre><code language="language-kotlin" class="language-kotlin">@Test
 fun `should remove inventory even if store does not have enough inventory (incorrect behavior)`() {
     val storeMock = mockk&lt;IStore&gt;(relaxed = true)
@@ -416,7 +553,7 @@ fun `should remove inventory even if store does not have enough inventory (incor
 }
 </code></pre>
 <h3 is-upgraded>適切な例</h3>
-<p>外部へのコマンドを検証するモックを用いるテストは正しい。</p>
+<p>外部へのコマンドを検証するモックを用いるテストは正しい。 下記のコードでは、 <code>hasEnoughInventory</code> をスタブとして使用し、 <code>purchase</code> を実行したら、 <code>storeMock.removeInventory</code> が適切に呼ばれているかを検証しています。</p>
 <pre><code language="language-kotlin" class="language-kotlin">@Test
 fun `should not remove inventory if store does not have enough inventory`() {
     val storeMock = mockk&lt;IStore&gt;(relaxed = true)
@@ -440,7 +577,7 @@ fun `should not remove inventory if store does not have enough inventory`() {
 <p>ドメイン層とアプリケーション層を分離することで、良いテストが書けるようになる。</p>
 <ul>
 <li>ドメイン層: ビジネスロジックを表現する部分。</li>
-<li>アプリケーション層: 外部依存とのやり取りを担当する部分。 FAANSアプリではこの分離が行われているため、特に大きな修正は不要。</li>
+<li>アプリケーション層: 外部依存とのやり取りを担当する部分。</li>
 </ul>
 <h2 is-upgraded>まとめ</h2>
 <ol type="1">
@@ -482,6 +619,12 @@ class CalculatorOutputTest {
     }
 }
 </code></pre>
+<p>出力値ベーステストは、テストの保守性を高める基本手法ですが、以下の場合には適用が難しいことがあります。</p>
+<ul>
+<li>外部サービスとのやり取り（例: API呼び出し）が含まれる場合</li>
+<li>結果として副作用を伴う処理（例: データベース更新）が中心の場合</li>
+<li>こうした場合には状態ベーステストやコミュニケーションベーステストと組み合わせる必要があります。</li>
+</ul>
 <h3 is-upgraded>評価 (4本の柱)</h3>
 <ul>
 <li>退行に対する保護: 高い</li>
@@ -613,7 +756,7 @@ class CalculatorStateTest {
       </google-codelab-step>
     
       <google-codelab-step label="まとめ" duration="0">
-        <p>Jetpack Composeでの単体テストを効果的に実施するためには、以下の知識と技術が重要です。</p>
+        <p>単体テストを効果的に実施するためには、以下の知識と技術が重要です。</p>
 <ol type="1">
 <li><strong>AAAパターンの徹底<br></strong> テストを一貫した構造で書くことで、コードの読みやすさとメンテナンス性が向上します。</li>
 <li><strong>良いテストの4本の柱の追求</strong><ul>
@@ -635,7 +778,13 @@ class CalculatorStateTest {
 <p>単体テストは、コードの品質向上とプロジェクトの持続可能性に寄与します。良いテストは、コードの変更によるリスクを軽減し、開発の効率と安心感を高めます。</p>
 <h2 is-upgraded>テストの最適化</h2>
 <p>すべてのテスト手法を一律に適用するのではなく、プロジェクトの特性やコードベースに合わせて適切に選択することが重要です。特に、出力値ベーステストを基盤としながら、状況に応じて状態ベースやコミュニケーションベースのテストを補完的に使用することで、テストの価値を最大化できます。</p>
-<p>Jetpack Composeを活用した単体テストを通じて、品質の高いコードベースとスムーズな開発プロセスを構築しましょう。</p>
+<p>このCodelabで学んだ知識を実務で活用するには、以下を実践してみましょう:</p>
+<ol type="1">
+<li>プロジェクトでAAAパターンを導入し、一貫性のあるテスト設計を行う。</li>
+<li>チームで「良いテストの4本の柱」を意識したレビューを実施し、テストの質を向上させる。</li>
+<li>モックやスタブを使い分け、効率的なテストコードを書ける環境を整える。</li>
+</ol>
+<p>単体テストを通じて、品質の高いコードベースとスムーズな開発プロセスを構築しましょう。</p>
 
 
       </google-codelab-step>
