@@ -29,7 +29,7 @@
                   feedback-link="https://github.com/yshogo">
     
       <google-codelab-step label="はじめに" duration="0">
-        <p>このCodelabでは、「単体テストの考え方/使い方」を参考に、ソフトウェア改発での単体テストの基礎を学びます。 Kotlinを使ったサンプルコードを通じて、テスト実装の具体的な方法を解説します。</p>
+        <p>このCodelabでは、「単体テストの考え方/使い方」を参考に、ソフトウェア開発での単体テストの基礎を学びます。 Kotlinを使ったサンプルコードを通じて、テスト実装の具体的な方法を解説します。</p>
 <aside class="warning"><p> 注意： このCodelabは山田の解釈を基に作成されていますが、本書の内容を完全に網羅しているわけではありません。<br> また、解釈に誤りが含まれている可能性もあります。そのため、このCodelabを通じて基本的な理解を深めるだけでなく、必ず原書も併せてお読みいただき、より深い理解を得ていただくことを推奨します。 </p>
 <p>原書は<a href="https://amzn.to/3Cq9Ze0" target="_blank">こちら</a><br> 読書メモは<a href="https://zozo.rickcloud.jp/wiki/pages/viewpage.action?pageId=740200895" target="_blank">こちら</a></p>
 </aside>
@@ -115,8 +115,8 @@ fun `test person instance creation`() {
     val person = Person(&#34;Taro&#34;, 25)
     
     // プロパティの値をテスト
-    assertEquals(&#34;Taro&#34;, person.name, &#34;名前が正しくありません&#34;)
-    assertEquals(25, person.age, &#34;年齢が正しくありません&#34;)
+    assertEquals(&#34;Taro&#34;, person.name)
+    assertEquals(25, person.age)
 }
 </code></pre>
 <p>この方法では、依存関係が増えるとテストが複雑になることもありますが、コードの設計に依存が少なくなるような工夫を促す効果もあります。</p>
@@ -130,8 +130,8 @@ fun `test person instance creation`() {
     whenever(person.age).thenReturn(25)
     
     // プロパティの値をテスト
-    assertEquals(&#34;Taro&#34;, person.name, &#34;名前が正しくありません&#34;)
-    assertEquals(25, person.age, &#34;年齢が正しくありません&#34;)
+    assertEquals(&#34;Taro&#34;, person.name)
+    assertEquals(25, person.age)
 }
 </code></pre>
 <p>ロンドン学派は、テスト対象のクラス（「1つのクラス」）を単体と見なし、他の依存を全てモック化することによって独立性を保ちます。このため、依存が多いコードに適していますが、モック化の量が増えるとテストのメンテナンスが複雑になる可能性があります。</p>
@@ -232,7 +232,7 @@ fun `test person instance creation`() {
 <p>以下は、AAAパターンを適用した単純なテストケースの例です。</p>
 <pre><code language="language-kotlin" class="language-kotlin">// AAAパターンを適用した詳細なテスト例
 @Test
-fun `addition should return correct sum`() {
+fun `is_addition_correctly_summed`() {
     // Arrange: テスト対象を準備
     val calculator = Calculator()
     val inputA = 10
@@ -242,7 +242,7 @@ fun `addition should return correct sum`() {
     val result = calculator.add(inputA, inputB)
 
     // Assert: 結果を確認
-    assertEquals(30, result, &#34;加算の結果が期待値と一致しません&#34;)
+    assertEquals(30, result)
 }
 </code></pre>
 <h2 is-upgraded>テストメソッドの命名規則</h2>
@@ -334,19 +334,6 @@ fun `addition should return correct sum`() {
 </ul>
 </li>
 </ul>
-<p><strong>例</strong></p>
-<pre><code language="language-kotlin" class="language-kotlin">fun testHtmlGeneration() {
-    // Arrange
-    val generator = HtmlGenerator()
-    val data = SampleData()
-
-    // Act
-    val html = generator.generateHtml(data)
-
-    // Assert
-    assertTrue(html.contains(&#34;ExpectedMessage&#34;))
-}
-</code></pre>
 <h2 is-upgraded>3. 迅速なフィードバック</h2>
 <p>テストは、変更の影響をすばやくフィードバックする仕組みであるべきです。</p>
 <ul>
@@ -567,12 +554,6 @@ fun `should not remove inventory if store does not have enough inventory`() {
     verify(exactly = 0) { storeMock.removeInventory(Product.Shampoo, 5) }
 }
 </code></pre>
-<h2 is-upgraded>コマンドとクエリの分離</h2>
-<h3 is-upgraded>コマンド</h3>
-<p>副作用を伴うメソッド。 例: オブジェクトの値を変更するメソッド。</p>
-<h3 is-upgraded>クエリ</h3>
-<p>副作用を伴わず値を返すメソッド。 例: 引数を足し算して結果を返すメソッド。</p>
-<p>モックはコマンド、スタブはクエリを模倣する役割を持つ。</p>
 <h3 is-upgraded>設計のポイント</h3>
 <p>ドメイン層とアプリケーション層を分離することで、良いテストが書けるようになる。</p>
 <ul>

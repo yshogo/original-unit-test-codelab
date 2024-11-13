@@ -12,7 +12,7 @@ default-next-page: https://github.com/yshogo
 
 ## はじめに
 
-このCodelabでは、「単体テストの考え方/使い方」を参考に、ソフトウェア改発での単体テストの基礎を学びます。
+このCodelabでは、「単体テストの考え方/使い方」を参考に、ソフトウェア開発での単体テストの基礎を学びます。
 Kotlinを使ったサンプルコードを通じて、テスト実装の具体的な方法を解説します。
 
 <aside class="negative">
@@ -120,8 +120,8 @@ fun `test person instance creation`() {
     val person = Person("Taro", 25)
     
     // プロパティの値をテスト
-    assertEquals("Taro", person.name, "名前が正しくありません")
-    assertEquals(25, person.age, "年齢が正しくありません")
+    assertEquals("Taro", person.name)
+    assertEquals(25, person.age)
 }
 ```
 
@@ -139,8 +139,8 @@ fun `test person instance creation`() {
     whenever(person.age).thenReturn(25)
     
     // プロパティの値をテスト
-    assertEquals("Taro", person.name, "名前が正しくありません")
-    assertEquals(25, person.age, "年齢が正しくありません")
+    assertEquals("Taro", person.name)
+    assertEquals(25, person.age)
 }
 ```
 
@@ -228,7 +228,7 @@ fun `test person instance creation`() {
 ```kotlin
 // AAAパターンを適用した詳細なテスト例
 @Test
-fun `addition should return correct sum`() {
+fun `is_addition_correctly_summed`() {
     // Arrange: テスト対象を準備
     val calculator = Calculator()
     val inputA = 10
@@ -238,7 +238,7 @@ fun `addition should return correct sum`() {
     val result = calculator.add(inputA, inputB)
 
     // Assert: 結果を確認
-    assertEquals(30, result, "加算の結果が期待値と一致しません")
+    assertEquals(30, result)
 }
 ```
 
@@ -311,21 +311,6 @@ fun `addition should return correct sum`() {
   - **テスト対象のコードの内部実装からテストコードを切り離す**。
   - テストの検証対象を「観察可能な振る舞い」に限定する。
   - テスト対象のコードを呼び出す側の視点で結果を確認し、実装の詳細には依存しない。
-
-**例**
-```kotlin
-fun testHtmlGeneration() {
-    // Arrange
-    val generator = HtmlGenerator()
-    val data = SampleData()
-
-    // Act
-    val html = generator.generateHtml(data)
-
-    // Assert
-    assertTrue(html.contains("ExpectedMessage"))
-}
-```
 
 ### 3. 迅速なフィードバック
 テストは、変更の影響をすばやくフィードバックする仕組みであるべきです。
@@ -563,18 +548,6 @@ fun `should not remove inventory if store does not have enough inventory`() {
     verify(exactly = 0) { storeMock.removeInventory(Product.Shampoo, 5) }
 }
 ```
-
-### コマンドとクエリの分離
-
-#### コマンド
-副作用を伴うメソッド。
-例: オブジェクトの値を変更するメソッド。
-
-#### クエリ
-副作用を伴わず値を返すメソッド。
-例: 引数を足し算して結果を返すメソッド。
-
-モックはコマンド、スタブはクエリを模倣する役割を持つ。
 
 #### 設計のポイント
 ドメイン層とアプリケーション層を分離することで、良いテストが書けるようになる。
